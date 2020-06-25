@@ -1,5 +1,18 @@
+const { Pool } = require('pg');
+
+const pool = new Pool({
+  user: 'vagrant',
+  password: '123',
+  host: 'localhost',
+  database: 'lightbnb'
+});
+
 const properties = require('./json/properties.json');
 const users = require('./json/users.json');
+
+
+
+
 
 /// Users
 
@@ -38,7 +51,7 @@ exports.getUserWithId = getUserWithId;
  * @param {{name: string, password: string, email: string}} user
  * @return {Promise<{}>} A promise to the user.
  */
-const addUser =  function(user) {
+const addUser = function(user) {
   const userId = Object.keys(users).length + 1;
   user.id = userId;
   users[userId] = user;
@@ -60,19 +73,14 @@ exports.getAllReservations = getAllReservations;
 
 /// Properties
 
-/**
- * Get all properties.
- * @param {{}} options An object containing query options.
- * @param {*} limit The number of results to return.
- * @return {Promise<[{}]>}  A promise to the properties.
- */
+//Newly implemented query function. This format is parametized to avoid SQL injections.
 const getAllProperties = function(options, limit = 10) {
-  const limitedProperties = {};
-  for (let i = 1; i <= limit; i++) {
-    limitedProperties[i] = properties[i];
-  }
-  return Promise.resolve(limitedProperties);
-}
+  return pool.query(`
+  SELECT * FROM properties
+  LIMIT $1
+  `, [limit])
+  .then(res => res.rows);
+};
 exports.getAllProperties = getAllProperties;
 
 
