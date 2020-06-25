@@ -113,7 +113,7 @@ exports.getAllReservations = getAllReservations;
 
 
 
-
+//Left original steps in for reference and the min option although breaking the min/max into two separate pieces would work too
 const getAllProperties = function(options, limit = 10) {
   // 1
   const queryParams = [];
@@ -142,7 +142,7 @@ const getAllProperties = function(options, limit = 10) {
 
     queryString +=  ` AND properties.cost_per_night < $${queryParams.length} `;
   }
-  
+
   if (options['minimum_rating']) {
 
     queryParams.push(`${options['minimum_rating']}`);
@@ -176,13 +176,6 @@ const getAllProperties = function(options, limit = 10) {
     .then(res => res.rows);
 }
 
-// const getAllProperties = function(options, limit = 10) {
-//   return pool.query(`
-//   SELECT * FROM properties
-//   LIMIT $1
-//     `, [limit])
-//   .then(res => res.rows);
-// };
 exports.getAllProperties = getAllProperties;
 
 
@@ -191,10 +184,28 @@ exports.getAllProperties = getAllProperties;
  * @param {{}} property An object containing all of the property details.
  * @return {Promise<{}>} A promise to the property.
  */
+
+
 const addProperty = function(property) {
-  const propertyId = Object.keys(properties).length + 1;
-  property.id = propertyId;
-  properties[propertyId] = property;
-  return Promise.resolve(property);
-}
+  return pool.query(`
+  INSERT INTO properties (owner_id, title, description, thumbnail_photo_url, cover_photo_url, cost_per_night,
+    parking_spaces, number_of_bathrooms, number_of_bedrooms, country, street, city, province, post_code) 
+  VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
+  RETURNING *
+  `, [property.owner_id, property.title, property.description, property.thumbnail_photo_url, property.cover_photo_url,
+     property.cost_per_night, property.parking_spaces, property.number_of_bathrooms, property.number_of_bedrooms,
+      property.country, property.street, property.city, property.province, property.post_code])
+    .then(res => {
+      console.log(res.rows[0]);
+      // console.log("THis is res", res.rows[0], "this is user", user);
+      return res.rows[0]
+    });
+};
+
+// const addProperty = function(property) {
+//   const propertyId = Object.keys(properties).length + 1;
+//   property.id = propertyId;
+//   properties[propertyId] = property;
+//   return Promise.resolve(property);
+// }
 exports.addProperty = addProperty;
