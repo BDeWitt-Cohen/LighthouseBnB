@@ -130,6 +130,8 @@ const getAllProperties = function(options, limit = 10) {
     queryParams.push(`%${options.city}%`);
     queryString += `AND city LIKE $${queryParams.length} `;
   }
+
+
   if (options['minimum_price_per_night'] && options['maximum_price_per_night']) {
 
     queryParams.push(`${options['minimum_price_per_night']}`);
@@ -140,13 +142,22 @@ const getAllProperties = function(options, limit = 10) {
 
     queryString +=  ` AND properties.cost_per_night < $${queryParams.length} `;
   }
-  if (options['minimum_price_per_night'] && !options['maximum_price_per_night']) {
+  
+  if (options['minimum_rating']) {
 
-    queryParams.push(`${options['minimum_price_per_night']}`);
+    queryParams.push(`${options['minimum_rating']}`);
 
-    queryString += ` AND properties.cost_per_night > $${queryParams.length}`
+    queryString += ` AND property_reviews.rating >= $${queryParams.length}`
   }
 
+
+// This option is here in case they only have a minimum value and no max could easily flip for maximum
+//   if (options['minimum_price_per_night'] && !options['maximum_price_per_night']) {
+
+//     queryParams.push(`${options['minimum_price_per_night']}`);
+
+//     queryString += ` AND properties.cost_per_night > $${queryParams.length}`
+//   }
 
 
   // 4
